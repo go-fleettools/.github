@@ -25,6 +25,8 @@ cannot answer it that way.
 | [`fleetfind`](https://github.com/go-fleettools/fleetfind) | Which repository already does this: a live, **dated** inventory, because a hand-kept capability map drifts and a stale NO is worse than no answer. |
 | [`landingkit`](https://github.com/go-fleettools/landingkit) | The go-\* landings' shared design, as a Hugo module, plus the command that derives a brand from a logo and checks a landing against the reference. |
 | [`landingdiff`](https://github.com/go-fleettools/landingdiff) | Which of a set of landing layouts is the odd one out, by counting what each puts into the shared design system. |
+| [`modfloor`](https://github.com/go-fleettools/modfloor) | The Go toolchain floor a module **declares**, against the floor a fix **requires**: read from the published `go.mod`, where a consumer reads it. |
+| [`fuzzrun`](https://github.com/go-fleettools/fuzzrun) | Run every Go fuzz target of a module, in parallel within a load budget, and report crashers with the corpus file that reproduces them. |
 
 ## The thirty commands in `fleettools`
 
