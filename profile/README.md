@@ -17,7 +17,7 @@ cannot answer it that way.
 
 | Repo | |
 |---|---|
-| [`fleettools`](https://github.com/go-fleettools/fleettools) | Thirty commands, listed below. The sweeps that read every organisation, and the per-repository halves they pair with. |
+| [`fleettools`](https://github.com/go-fleettools/fleettools) | 49 commands at v0.40.0 (counted: 49 directories under `cmd/`, each with a `main.go`); this index lists thirty of them, below. The sweeps that read every organisation, and the per-repository halves they pair with. |
 | [`staletools`](https://github.com/go-fleettools/staletools) | Two ways an installed tool is not what you think: built with an older **toolchain** — an analyser built with an older Go does not fail, it misreports — and being an older **release** of itself. |
 | [`mutate`](https://github.com/go-fleettools/mutate) | Prove that a test can fail: one exact source mutation, run the suite, restore whatever happens. A green suite over a mutation that survives is a suite that proves nothing. |
 | [`prwait`](https://github.com/go-fleettools/prwait) | Wait for a pull request's checks, and **refuse to call an empty check list a pass**. A pull request with no merge ref runs no workflow and reads as green to any filter. |
@@ -28,7 +28,11 @@ cannot answer it that way.
 | [`modfloor`](https://github.com/go-fleettools/modfloor) | The Go toolchain floor a module **declares**, against the floor a fix **requires**: read from the published `go.mod`, where a consumer reads it. |
 | [`fuzzrun`](https://github.com/go-fleettools/fuzzrun) | Run every Go fuzz target of a module, in parallel within a load budget, and report crashers with the corpus file that reproduces them. |
 
-## The thirty commands in `fleettools`
+## Thirty of the 49 commands in `fleettools`
+
+`fleettools` has 49 commands at v0.40.0 (49 directories under `cmd/`, each with a
+`main.go`, counted on 2026-10-26); this index names thirty of them. The other
+nineteen are not named here; each is a directory under `cmd/`.
 
 They are listed here because **nothing else can find them.** `fleetfind` answers
 "which repository already does this" from a repository-level inventory, so a command
