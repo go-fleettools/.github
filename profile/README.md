@@ -17,7 +17,7 @@ cannot answer it that way.
 
 | Repo | |
 |---|---|
-| [`fleettools`](https://github.com/go-fleettools/fleettools) | 49 commands at v0.40.0 (counted: 49 directories under `cmd/`, each with a `main.go`); this index lists thirty of them, below. The sweeps that read every organisation, and the per-repository halves they pair with. |
+| [`fleettools`](https://github.com/go-fleettools/fleettools) | 53 commands at v0.46.1 (counted: 53 directories under `cmd/`, each with a `main.go`); this index lists thirty of them, below. The sweeps that read every organisation, and the per-repository halves they pair with. |
 | [`staletools`](https://github.com/go-fleettools/staletools) | Two ways an installed tool is not what you think: built with an older **toolchain** — an analyser built with an older Go does not fail, it misreports — and being an older **release** of itself. |
 | [`mutate`](https://github.com/go-fleettools/mutate) | Prove that a test can fail: one exact source mutation, run the suite, restore whatever happens. A green suite over a mutation that survives is a suite that proves nothing. |
 | [`prwait`](https://github.com/go-fleettools/prwait) | Wait for a pull request's checks, and **refuse to call an empty check list a pass**. A pull request with no merge ref runs no workflow and reads as green to any filter. |
@@ -27,12 +27,13 @@ cannot answer it that way.
 | [`landingdiff`](https://github.com/go-fleettools/landingdiff) | Which of a set of landing layouts is the odd one out, by counting what each puts into the shared design system. |
 | [`modfloor`](https://github.com/go-fleettools/modfloor) | The Go toolchain floor a module **declares**, against the floor a fix **requires**: read from the published `go.mod`, where a consumer reads it. |
 | [`fuzzrun`](https://github.com/go-fleettools/fuzzrun) | Run every Go fuzz target of a module, in parallel within a load budget, and report crashers with the corpus file that reproduces them. |
+| [`buildstamp`](https://github.com/go-fleettools/buildstamp) | The Go build information of any binary, **WebAssembly included**, and a refusal for one built from a modified tree. `debug/buildinfo` reads ELF, Mach-O, PE, XCOFF and Plan 9 and answers `unrecognized file format` for a `.wasm`; the go command writes the same text into every binary, between two sentinels, so one reader works for every format. |
 
-## Thirty of the 49 commands in `fleettools`
+## Thirty of the 53 commands in `fleettools`
 
-`fleettools` has 49 commands at v0.40.0 (49 directories under `cmd/`, each with a
-`main.go`, counted on 2026-10-26); this index names thirty of them. The other
-nineteen are not named here; each is a directory under `cmd/`.
+`fleettools` has 53 commands at v0.46.1 (53 directories under `cmd/`, each with a
+`main.go`, counted on 2026-10-31); this index names thirty of them. The other
+twenty-three are not named here; each is a directory under `cmd/`.
 
 They are listed here because **nothing else can find them.** `fleetfind` answers
 "which repository already does this" from a repository-level inventory, so a command
