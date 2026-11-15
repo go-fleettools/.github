@@ -1,0 +1,136 @@
+# The organisation's govulncheck lane, defined ONCE and called by a module that
+# has none of its own.
+#
+# ⛔ WHY IT EXISTS HERE, and the measurement is this organisation's own rather
+# than a sibling's. `gofloor --floor 1.27.4 go-fleettools` on 2026-11-15:
+#
+#     12 Go repositories: 10 with findings, 0 unreadable
+#     …
+#     go-fleettools/landingdiff   govulncheck: none
+#     go-fleettools/fleetfind     govulncheck: none
+#     go-fleettools/unbounded     govulncheck: none
+#
+# Three published tools with nothing standing between them and the next
+# advisory. ⛔ AND THIS IS THE ORGANISATION THAT BUILDS THE INSTRUMENTS: gofloor,
+# vulnscan, vulngate and modfloor all live here, and three of their siblings were
+# the unprotected ones. `vuln.yml` in go-fleettools/fleettools already records
+# the same shape in its own words — "the tools that find this defect across 1800
+# repositories had it themselves".
+#
+# ⛔ WHAT A LANE CATCHES THAT A SWEEP BY HAND DOES NOT. The same morning,
+# `modfloor --floor 1.27.4` found EIGHT of the eleven published modules of this
+# organisation declaring `go 1.27.3`, carrying GO-2026-6859 (net/http) to every
+# consumer running `go install` with GOTOOLCHAIN=local. Nothing reported it: it
+# was found because a session happened to type the command. The remedy for the
+# floor is a clock (modfloor beside the nightly vulnscan sweep); the remedy for
+# the advisories themselves is this lane, on every module's pull requests.
+#
+# ⛔ WHY ONE DEFINITION AND NOT A COPY PER REPOSITORY. Copies drift, and the
+# copy that drifts is the one nobody reads. A caller is two lines:
+#
+#     vulns:
+#       uses: go-fleettools/.github/.github/workflows/vulns.yml@main
+#
+# @main and not a pinned SHA, deliberately: this is a workflow of the SAME
+# organisation, under the same review and branch protection as its callers, and a
+# pinned SHA would need one pull request per caller to move — which is how a
+# single definition quietly becomes N again. A third-party action is pinned; a
+# sibling of the caller is not.
+#
+# ⚠ THE AUDITOR USED TO GO BLIND ON EXACTLY THIS, so it is worth saying that it
+# no longer does: a `uses:` job has no steps, and every rule in `gofloor` walked
+# steps, so extracting a lane in go-richdoc made eleven protected repositories
+# read `govulncheck: none` (fleettools#203). Fixed in fleettools v0.116.0, which
+# follows a called workflow one level and attributes its verdict to the caller.
+# A caller of this file therefore reads `gates`, verified after the fact rather
+# than assumed.
+#
+# ⛔ AND ONE REPOSITORY MUST NOT CALL THIS: go-fleettools.github.io. Its `go.mod`
+# exists only so `go mod tidy` keeps a HUGO module pinned, its single Go file is
+# `//go:build tools` and never builds, so govulncheck matches no packages and
+# vulngate correctly refuses the run ("the scan did not run, which is not the
+# same as finding nothing"). The two ways to make such a lane green — a build tag
+# or `-scan module` — both publish a CLEAN verdict over a scan that read nothing,
+# which is the exact failure this lane exists to prevent. That is fleettools#206.
+
+name: vulns
+
+on:
+  workflow_call:
+    inputs:
+      go-version:
+        description: >-
+          An explicit toolchain to scan under. Leave it unset — the default — to
+          follow the caller's own go.mod, which is the right answer and not
+          merely the convenient one: the standard library's findings are decided
+          by one version, and the version a module DECLARES is the one its
+          consumers are entitled to build it with. Measured in this fleet:
+          identical source reported eight standard-library advisories under
+          go1.27.1 and none under go1.27.2. Set this only to answer a different
+          question on purpose, and say why at the call site.
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  vulns:
+    name: govulncheck, judged by vulngate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # Exactly one of the two is ever non-empty: setup-go prefers go-version
+      # when both are set, and `gofloor` reports a hard-coded version as a
+      # finding precisely because a lane pinned beside a go.mod drifts from it
+      # silently.
+      - uses: actions/setup-go@v7
+        with:
+          go-version: ${{ inputs.go-version }}
+          go-version-file: ${{ inputs.go-version == '' && 'go.mod' || '' }}
+      # Printed, because the toolchain IS part of the verdict: a reader of a
+      # green run can see which standard library was judged.
+      - run: go version
+
+      # ⛔ NO `set -o pipefail`, and the `|| true` is deliberate rather than
+      # sloppy. govulncheck exits non-zero over findings it has itself decided
+      # this module does not CALL, and zero over some it does: its exit status
+      # answers a different question from the one this lane asks. That is why the
+      # stream is handed to vulngate instead of being believed.
+      #
+      # An unread or truncated scan is caught twice: by the emptiness test below,
+      # and by vulngate, which believes a run only when it carried both a config
+      # AND an SBOM — the SBOM being written only once the packages have actually
+      # loaded. A scan that could not load the packages prints no finding, and
+      # read as JSON alone that is indistinguishable from a clean repository.
+      #
+      # ⛔ BOTH TOOLS PINNED, and govulncheck NOT at @latest: the scanner's
+      # version decides the answer exactly as the toolchain does, and v1.1.4 —
+      # which parts of this fleet still pin locally — PANICS loading a linux build
+      # ("unexpected expr *ast.KeyValueExpr"), a crash rather than an advisory.
+      # The pins stay honest without a person: this organisation's Renovate preset
+      # (default.json) carries a custom manager matching
+      # `go install <module>@vN` inside `.github/workflows/*.yml`, which is the one
+      # line in a workflow the gomod manager cannot see.
+      #
+      # ⛔⛔ TWO TOOLCHAINS, AND THEY ARE NOT THE SAME QUESTION. The toolchain that
+      # BUILDS these tools must satisfy the tools' OWN floor; the toolchain the
+      # SCAN runs under must be the one the caller's go.mod declares, because that
+      # decides every standard-library finding. Conflating them breaks the moment a
+      # caller sits below the tools' floor: setup-go sets GOTOOLCHAIN=local by
+      # design, so `go install` refuses rather than fetching a newer toolchain, and
+      # the lane fails for a reason unrelated to that repository's dependencies.
+      # GOTOOLCHAIN=auto on the INSTALLS alone lets each tool build with whatever
+      # its own go.mod requires; the scan keeps the local toolchain, so the
+      # standard library judged is still the caller's.
+      - name: govulncheck, judged by vulngate
+        run: |
+          set -eu
+          GOTOOLCHAIN=auto go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
+          GOTOOLCHAIN=auto go install github.com/go-fleettools/fleettools/cmd/vulngate@v0.123.0
+          BIN="$(go env GOPATH)/bin"
+          echo "tools built with GOTOOLCHAIN=auto; scanning as $(go env GOVERSION)"
+          "$BIN/govulncheck" -format json ./... > "$RUNNER_TEMP/vuln.json" || true
+          test -s "$RUNNER_TEMP/vuln.json" || { echo "::error::govulncheck wrote nothing at all"; exit 1; }
+          "$BIN/vulngate" --go "$(go env GOVERSION)" "$RUNNER_TEMP/vuln.json"
