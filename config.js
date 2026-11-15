@@ -19,7 +19,14 @@ module.exports = {
   autodiscoverFilter: ['go-fleettools/**'],
   onboarding: false,
   requireConfig: 'optional',
-  dependencyDashboard: true,
+  // ⛔ AN OBJECT, NOT A BOOLEAN. Upstream migrated this key, and the validator
+  // this repository's CI runs is `renovate@latest`, so `--strict` exits 1 on
+  // the boolean with nothing here changed. Measured on go-xrkit/.github
+  // 2026-11-15 (its #30), where the lane was red and an innocent pull request
+  // looked guilty; go-richdoc hit the same key the day before. The old spelling
+  // still WORKS — Renovate migrates it at run time and warns — so what the
+  // boolean breaks is the only check that says this config is still valid.
+  dependencyDashboard: { enabled: true },
   repositoryCache: 'enabled',
   // default.json beside this file is a PRESET, and a preset reaches a
   // repository only through an `extends` that names it. Sitting in the
